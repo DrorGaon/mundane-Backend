@@ -2,7 +2,7 @@ import { ObjectId } from 'mongodb'
 
 import { dbService } from '../../services/db.service.js'
 import { logger } from '../../services/logger.service.js'
-import { utilService } from '../../services/util.service.js'
+// import { utilService } from '../../services/util.service.js'
 
 export const boardService = {
 	remove,
@@ -17,7 +17,7 @@ export const boardService = {
 async function query(filterBy = { txt: '' }) {
 	try {
 		const criteria = {
-			vendor: { $regex: filterBy.txt, $options: 'i' },
+			title: { $regex: filterBy.txt, $options: 'i' },
 		}
 		const collection = await dbService.getCollection('board')
 		var boards = await collection.find(criteria).toArray()
@@ -65,8 +65,7 @@ async function add(board) {
 async function update(board) {
 	try {
 		const boardToSave = {
-			vendor: board.vendor,
-			price: board.price,
+			title: board.title,
 		}
 		const collection = await dbService.getCollection('board')
 		await collection.updateOne({ _id: ObjectId.createFromHexString(board._id) }, { $set: boardToSave })
