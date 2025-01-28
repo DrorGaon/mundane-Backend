@@ -87,8 +87,8 @@ export async function removeGroup(req, res) {
     console.log('delete group')
     try {
         const { id: boardId, groupId } = req.params
-        const deletedCount = await boardService.removeGroup(boardId, groupId)
-        res.send(`${deletedCount} groups removed`)
+        const board = await boardService.removeGroup(boardId, groupId)
+        res.send(board)
     } catch (err) {
         logger.error('Failed to remove group', err)
         res.status(500).send({ err: 'Failed to remove group' })
@@ -119,31 +119,59 @@ export async function updateGroup(req, res) {
     }
 }
 
-export async function addBoardMsg(req, res) {
-    const { loggedinUser } = req
+export async function getTasks(req, res) {
     try {
-        const boardId = req.params.id
-        const msg = {
-            txt: req.body.txt,
-            by: loggedinUser,
-            createdAt: Date.now(),
-        }
-        const savedMsg = await boardService.addBoardMsg(boardId, msg)
-        res.json(savedMsg)
+        const { id: boardId, groupId } = req.params
+        const tasks = await boardService.getTasks(boardId, groupId)
+        res.json(tasks)        
     } catch (err) {
-        logger.error('Failed to update board', err)
-        res.status(500).send({ err: 'Failed to update board' })
+        logger.error('Failed to get tasks', err)
+        res.status(500).send({ err: 'Failed to get tasks' })
     }
 }
 
-export async function removeBoardMsg(req, res) {
+export async function getTaskById(req, res) {
     try {
-        const { id: boardId, msgId } = req.params
-
-        const removedId = await boardService.removeBoardMsg(boardId, msgId)
-        res.send(removedId)
+        const { id: boardId, groupId, taskId } = req.params
+        const task = await boardService.getTaskById(boardId, groupId, taskId)
+        res.json(task)        
     } catch (err) {
-        logger.error('Failed to remove board msg', err)
-        res.status(500).send({ err: 'Failed to remove board msg' })
+        logger.error('Failed to get tasks', err)
+        res.status(500).send({ err: 'Failed to get tasks' })
+    }
+}
+
+export async function removeTask(req, res) {
+    try {
+        const { id: boardId, groupId, taskId } = req.params
+        const board = await boardService.removeTask(boardId, groupId, taskId)
+        res.json(board)        
+    } catch (err) {
+        logger.error('Failed to remove task', err)
+        res.status(500).send({ err: 'Failed to remove task' })
+    }
+}
+
+export async function addTask(req, res) {
+    try {
+        const { id: boardId, groupId } = req.params
+        const task = req.body
+        const board = await boardService.addTask(boardId, groupId, task)
+        res.json(board)        
+    } catch (err) {
+        logger.error('Failed to add task', err)
+        res.status(500).send({ err: 'Failed to add task' })
+    }
+}
+
+export async function updateTask(req, res) {
+    try {
+        const { id: boardId, groupId } = req.params
+        const task = req.body
+        const board = await boardService.updateTask(boardId, groupId, task)
+        res.json(board)        
+    } catch (err) {
+        logger.error('Failed to add task', err)
+        res.status(500).send({ err: 'Failed to add task' })
     }
 }
