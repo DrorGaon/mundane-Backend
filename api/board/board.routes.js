@@ -1,9 +1,13 @@
 import express from 'express'
 
-import { requireAuth, requireAdmin } from '../../middlewares/requireAuth.middleware.js'
-import { getBoards, getBoardById, addBoard, updateBoard, removeBoard, getGroupById, getGroups, removeGroup, addGroup, updateGroup, getTasks, getTaskById, removeTask, addTask, updateTask } from './board.controller.js'
+// import { requireAuth, requireAdmin } from '../../middlewares/requireAuth.middleware.js'
+import { getBoards, getBoardById, addBoard, updateBoard, removeBoard, } from './board.controller.js'
+import { addGroup, getGroupById, getGroups, removeGroup, updateGroup } from './group/group.controller.js'
+import { addTask, getTaskById, getTasks, removeTask, updateTask } from './task/task.controller.js'
 
 export const boardRoutes = express.Router()
+
+// removed authentication for now //
 
 //task
 boardRoutes.get('/:id/group/:groupId/task', getTasks)
@@ -22,7 +26,7 @@ boardRoutes.put('/:id/group/:groupId', updateGroup)
 //board
 boardRoutes.get('/', getBoards)
 boardRoutes.get('/:id', getBoardById)
-boardRoutes.post('/', requireAuth, addBoard)
-boardRoutes.put('/:id', requireAuth, updateBoard)
-boardRoutes.delete('/:id', requireAuth, removeBoard)
+boardRoutes.post('/', addBoard)
+boardRoutes.put('/:id', updateBoard)
+boardRoutes.delete('/:id', removeBoard)
 
