@@ -6,10 +6,8 @@ import { getBoards, getBoardById, addBoard, updateBoard, removeBoard, addBoardMs
 
 export const boardRoutes = express.Router()
 
-// middleware that is specific to this router
-// router.use(requireAuth)
 
-boardRoutes.get('/', log, getBoards)
+boardRoutes.get('/', getBoards)
 boardRoutes.get('/:id', getBoardById)
 boardRoutes.post('/', requireAuth, addBoard)
 boardRoutes.put('/:id', requireAuth, updateBoard)

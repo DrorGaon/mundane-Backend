@@ -66,6 +66,12 @@ async function update(board) {
 	try {
 		const boardToSave = {
 			title: board.title,
+			groups: board.groups,
+			members: board.members,
+			cmpsOrder: board.cmpsOrder,
+			statusLabels: board.statusLabels,
+			priorityLabels: board.priorityLabels,
+			activities: board.activities
 		}
 		const collection = await dbService.getCollection('board')
 		await collection.updateOne({ _id: ObjectId.createFromHexString(board._id) }, { $set: boardToSave })
