@@ -61,6 +61,64 @@ export async function removeBoard(req, res) {
     }
 }
 
+export async function getGroups(req, res) {
+    try {
+        const { id: boardId } = req.params
+        const group = await boardService.getGroups(boardId)
+        res.json(group)
+    } catch (err) {
+        logger.error('Failed to get groups', err)
+        res.status(500).send({ err: 'Failed to get groups' })
+    }
+}
+
+export async function getGroupById(req, res) {
+    try {
+        const { id: boardId, groupId } = req.params
+        const group = await boardService.getGroupById(boardId, groupId)
+        res.json(group)
+    } catch (err) {
+        logger.error('Failed to get group', err)
+        res.status(500).send({ err: 'Failed to get group' })
+    }
+}
+
+export async function removeGroup(req, res) {
+    console.log('delete group')
+    try {
+        const { id: boardId, groupId } = req.params
+        const deletedCount = await boardService.removeGroup(boardId, groupId)
+        res.send(`${deletedCount} groups removed`)
+    } catch (err) {
+        logger.error('Failed to remove group', err)
+        res.status(500).send({ err: 'Failed to remove group' })
+    }
+}
+
+export async function addGroup(req, res) {
+    try {
+        const { id: boardId } = req.params
+        const group = req.body
+        const board = await boardService.addGroup(boardId, group)
+        res.json(board)
+    } catch (err) {
+        logger.error('Failed to add group', err)
+        res.status(500).send({ err: 'Failed to add group' })
+    }
+}
+
+export async function updateGroup(req, res) {
+    try {
+        const { id: boardId } = req.params
+        const group = req.body
+        const board = await boardService.updateGroup(boardId, group)
+        res.json(board)
+    } catch (err) {
+        logger.error('Failed to update group', err)
+        res.status(500).send({ err: 'Failed to update group' })
+    }
+}
+
 export async function addBoardMsg(req, res) {
     const { loggedinUser } = req
     try {
