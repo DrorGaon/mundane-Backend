@@ -87,7 +87,6 @@ async function removeTask(boardId, groupId, taskId, isBulkAction = false) {
 async function addTask(boardId, groupId, task, isDuplicate = false) {
 	try {
 		task.id = utilService.makeId()
-		console.log(task.idx)
 
 		const criteria = {
 			_id: ObjectId.createFromHexString(boardId),
