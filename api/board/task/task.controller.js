@@ -58,3 +58,15 @@ export async function updateTask(req, res) {
         res.status(500).send({ err: 'Failed to add task' })
     }
 }
+
+export async function removeTasks(req, res) {
+    try {
+        const { id: boardId } = req.params
+        const taskAndGroupIds = req.body
+        const board = await taskService.removeTasks(boardId, taskAndGroupIds)
+        res.json(board)        
+    } catch (err) {
+        logger.error('Failed to remove tasks', err)
+        res.status(500).send({ err: 'Failed to remove tasks' })
+    }
+}

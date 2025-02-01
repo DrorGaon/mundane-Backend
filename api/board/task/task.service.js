@@ -10,6 +10,8 @@ export const taskService = {
     removeTask,
     addTask,
     updateTask,
+	removeTasks,
+	duplicateTasks,
 }
 
 
@@ -60,7 +62,7 @@ async function getTaskById(boardId, groupId, taskId) {
 	}
 }
 
-async function removeTask(boardId, groupId, taskId) {
+async function removeTask(boardId, groupId, taskId, isBulkAction = false) {
 	try {
 		const criteria = {
 			_id: ObjectId.createFromHexString(boardId),
@@ -75,7 +77,7 @@ async function removeTask(boardId, groupId, taskId) {
 		const { modifiedCount } = await collection.updateOne(criteria, remove)
 
 		if (!modifiedCount) throw new Error('problem removing task')
-		return await collection.findOne({_id: ObjectId.createFromHexString(boardId)})
+		if (!isBulkAction) return await collection.findOne({_id: ObjectId.createFromHexString(boardId)})
 	} catch (err) {
 		logger.error(`while finding tasks in group ${groupId}`, err)
 		throw err
@@ -133,3 +135,15 @@ async function updateTask(boardId, groupId, task) {
 		throw err
 	}
 }
+
+async function removeTasks( boardId, taskAndGroupsIds ) {
+	for (const ids of taskAndGroupsIds) {
+		removeTask(boardId, ids.groupId, ids.taskId)
+	}
+	const collection = await dbService.getCollection('board')
+	return await collection.findOne({_id: ObjectId.createFromHexString(boardId)})
+}	
+
+async function duplicateTasks( boardId, tasks ) {
+	console.log(tasks)
+}	
