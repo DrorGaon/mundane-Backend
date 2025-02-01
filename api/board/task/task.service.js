@@ -87,6 +87,7 @@ async function removeTask(boardId, groupId, taskId, isBulkAction = false) {
 async function addTask(boardId, groupId, task, isDuplicate = false) {
 	try {
 		task.id = utilService.makeId()
+		console.log(task.idx)
 
 		const criteria = {
 			_id: ObjectId.createFromHexString(boardId),
@@ -162,7 +163,7 @@ async function removeTasks( boardId, taskAndGroupsIds ) {
 async function duplicateTasks( boardId, tasks ) {
 	const collection = await dbService.getCollection('board')
 	const board = await collection.findOne({_id: ObjectId.createFromHexString(boardId)})
-	for (const task of tasks) {
+	for (const task of [...tasks].reverse()) {
 		const group = board.groups.find(group => group.id === task.groupId)
 		task.idx = group.tasks.findIndex(t => t.id === task.id)
 		await addTask(boardId, group.id, task, true)
