@@ -84,7 +84,7 @@ async function removeTask(boardId, groupId, taskId, isBulkAction = false) {
 	}
 }
 
-async function addTask(boardId, groupId, task) {
+async function addTask(boardId, groupId, task, isDuplicate = false) {
 	try {
 		task.id = utilService.makeId()
 
@@ -93,15 +93,30 @@ async function addTask(boardId, groupId, task) {
 			"groups.id": groupId,
 		}
 	
-		const add = { 
+		const add = isDuplicate 
+		? {
+        	$push: {
+        	  "groups.$.tasks": {
+        	    $each: [task],
+        	    $position: task.idx + 1
+        	  	}
+        	}
+		}
+		: { 
 			$push: { "groups.$.tasks": task } 
+		}
+		
+		if(isDuplicate) {
+			delete task.idx
+			delete task.groupId
+			task.title += ' (copy)'
 		}
 
 		const collection = await dbService.getCollection('board')
 		const { modifiedCount } = await collection.updateOne(criteria, add)
 
 		if (!modifiedCount) throw new Error('problem adding task')
-		return await collection.findOne({_id: ObjectId.createFromHexString(boardId)})
+		if (!isDuplicate) return await collection.findOne({_id: ObjectId.createFromHexString(boardId)})
 	} catch (err) {
 		logger.error(`while finding tasks in group ${groupId}`, err)
 		throw err
@@ -138,12 +153,19 @@ async function updateTask(boardId, groupId, task) {
 
 async function removeTasks( boardId, taskAndGroupsIds ) {
 	for (const ids of taskAndGroupsIds) {
-		removeTask(boardId, ids.groupId, ids.taskId)
+		await removeTask(boardId, ids.groupId, ids.taskId)
 	}
 	const collection = await dbService.getCollection('board')
 	return await collection.findOne({_id: ObjectId.createFromHexString(boardId)})
 }	
 
 async function duplicateTasks( boardId, tasks ) {
-	console.log(tasks)
+	const collection = await dbService.getCollection('board')
+	const board = await collection.findOne({_id: ObjectId.createFromHexString(boardId)})
+	for (const task of tasks) {
+		const group = board.groups.find(group => group.id === task.groupId)
+		task.idx = group.tasks.findIndex(t => t.id === task.id)
+		await addTask(boardId, group.id, task, true)
+	}
+	return await collection.findOne({_id: ObjectId.createFromHexString(boardId)})
 }	

@@ -70,3 +70,15 @@ export async function removeTasks(req, res) {
         res.status(500).send({ err: 'Failed to remove tasks' })
     }
 }
+
+export async function duplicateTasks(req, res) {
+    try {
+        const { id: boardId } = req.params
+        const tasks = req.body
+        const board = await taskService.duplicateTasks(boardId, tasks)
+        res.json(board)        
+    } catch (err) {
+        logger.error('Failed to duplicate', err)
+        res.status(500).send({ err: 'Failed to duplicate' })
+    }
+}
