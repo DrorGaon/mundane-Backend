@@ -1,4 +1,5 @@
 import { logger } from "../../../services/logger.service.js"
+import { socketService } from "../../../services/socket.service.js"
 import { groupService } from "./group.service.js"
 
 export async function getGroups(req, res) {
@@ -26,8 +27,10 @@ export async function getGroupById(req, res) {
 export async function removeGroup(req, res) {
     console.log('delete group')
     try {
+        const { loggedinUser } = req
         const { id: boardId, groupId } = req.params
         const board = await groupService.removeGroup(boardId, groupId)
+        socketService.broadcast({ type: 'board-updated', data: board, room: boardId, userId: loggedinUser._id })
         res.send(board)
     } catch (err) {
         logger.error('Failed to remove group', err)
@@ -37,9 +40,11 @@ export async function removeGroup(req, res) {
 
 export async function addGroup(req, res) {
     try {
+        const { loggedinUser } = req
         const { id: boardId } = req.params
         const group = req.body
         const board = await groupService.addGroup(boardId, group)
+        socketService.broadcast({ type: 'board-updated', data: board, room: boardId, userId: loggedinUser._id })
         res.json(board)
     } catch (err) {
         logger.error('Failed to add group', err)
@@ -49,12 +54,16 @@ export async function addGroup(req, res) {
 
 export async function updateGroup(req, res) {
     try {
+        const { loggedinUser } = req
         const { id: boardId } = req.params
         const group = req.body
         const board = await groupService.updateGroup(boardId, group)
+        socketService.broadcast({ type: 'board-updated', data: board, room: boardId, userId: loggedinUser._id })
         res.json(board)
     } catch (err) {
         logger.error('Failed to update group', err)
         res.status(500).send({ err: 'Failed to update group' })
     }
 }
+
+

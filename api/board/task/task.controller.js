@@ -1,4 +1,5 @@
 import { logger } from "../../../services/logger.service.js"
+import { socketService } from "../../../services/socket.service.js"
 import { taskService } from "./task.service.js"
 
 
@@ -26,8 +27,10 @@ export async function getTaskById(req, res) {
 
 export async function removeTask(req, res) {
     try {
+        const { loggedinUser } = req
         const { id: boardId, groupId, taskId } = req.params
         const board = await taskService.removeTask(boardId, groupId, taskId)
+        socketService.broadcast({ type: 'board-updated', data: board, room: boardId, userId: loggedinUser._id })
         res.json(board)        
     } catch (err) {
         logger.error('Failed to remove task', err)
@@ -37,9 +40,12 @@ export async function removeTask(req, res) {
 
 export async function addTask(req, res) {
     try {
+        const { loggedinUser } = req
         const { id: boardId, groupId } = req.params
         const task = req.body
+        console.log('add')
         const board = await taskService.addTask(boardId, groupId, task)
+        socketService.broadcast({ type: 'board-updated', data: board, room: boardId, userId: loggedinUser._id })
         res.json(board)        
     } catch (err) {
         logger.error('Failed to add task', err)
@@ -49,21 +55,25 @@ export async function addTask(req, res) {
 
 export async function updateTask(req, res) {
     try {
+        const { loggedinUser } = req
         const { id: boardId, groupId } = req.params
         const task = req.body
         const board = await taskService.updateTask(boardId, groupId, task)
+        socketService.broadcast({ type: 'board-updated', data: board, room: boardId, userId: loggedinUser._id })
         res.json(board)        
     } catch (err) {
-        logger.error('Failed to add task', err)
-        res.status(500).send({ err: 'Failed to add task' })
+        logger.error('Failed to update task', err)
+        res.status(500).send({ err: 'Failed to update task' })
     }
 }
 
 export async function removeTasks(req, res) {
     try {
+        const { loggedinUser } = req
         const { id: boardId } = req.params
         const taskAndGroupIds = req.body
         const board = await taskService.removeTasks(boardId, taskAndGroupIds)
+        socketService.broadcast({ type: 'board-updated', data: board, room: boardId, userId: loggedinUser._id })
         res.json(board)        
     } catch (err) {
         logger.error('Failed to remove tasks', err)
@@ -73,9 +83,11 @@ export async function removeTasks(req, res) {
 
 export async function duplicateTasks(req, res) {
     try {
+        const { loggedinUser } = req
         const { id: boardId } = req.params
         const tasks = req.body
         const board = await taskService.duplicateTasks(boardId, tasks)
+        socketService.broadcast({ type: 'board-updated', data: board, room: boardId, userId: loggedinUser._id })
         res.json(board)        
     } catch (err) {
         logger.error('Failed to duplicate', err)

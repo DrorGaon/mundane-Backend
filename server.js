@@ -3,6 +3,8 @@ import cookieParser from 'cookie-parser'
 import cors  from 'cors'
 import path, { dirname } from 'path'
 import { fileURLToPath } from 'url'
+import http from 'http'
+import { Server } from "socket.io"
 
 import { authRoutes } from './api/auth/auth.routes.js'
 import { userRoutes } from './api/user/user.routes.js'
@@ -13,8 +15,10 @@ const __filename = fileURLToPath(import.meta.url)
 const __dirname = dirname(__filename)
 
 import { logger } from './services/logger.service.js'
+import { setupSocketAPI } from './services/socket.service.js'
 
 const app = express()
+const server = http.createServer(app)
 
 app.use(cookieParser())
 app.use(express.json())
@@ -42,6 +46,7 @@ app.use('/api/auth', authRoutes)
 app.use('/api/user', userRoutes)
 app.use('/api/board', boardRoutes)
 
+setupSocketAPI(server)
 
 app.get('/**', (req, res) => {
     res.sendFile(path.resolve('public/index.html'))
@@ -49,6 +54,6 @@ app.get('/**', (req, res) => {
 
 const port = process.env.PORT || 3030
 
-app.listen(port, () => {
+server.listen(port, () => {
     logger.info('Server is running on port: ' + port)
 })

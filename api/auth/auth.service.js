@@ -2,7 +2,6 @@ import Cryptr from 'cryptr'
 import bcrypt from 'bcrypt'
 
 import { userService } from '../user/user.service.js'
-import { logger } from '../../services/logger.service.js'
 
 export const authService = {
     signup,
@@ -14,8 +13,6 @@ export const authService = {
 const cryptr = new Cryptr(process.env.SECRET1 || 'Secret-Puk-1234')
 
 async function login(username, password) {
-    logger.debug(`auth.service - login with username: ${username}`)
-
     const user = await userService.getByUsername(username)
     if (!user) throw new Error('Invalid username or password1')
 
@@ -29,7 +26,6 @@ async function login(username, password) {
 async function signup(username, password, fullname) {
     const saltRounds = 10
 
-    logger.debug(`auth.service - signup with username: ${username}, fullname: ${fullname}`)
     if (!username || !password || !fullname) throw new Error('Missing details')
 
     const hash = await bcrypt.hash(password, saltRounds)
