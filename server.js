@@ -4,6 +4,11 @@ import cors  from 'cors'
 import path, { dirname } from 'path'
 import { fileURLToPath } from 'url'
 
+import { authRoutes } from './api/auth/auth.routes.js'
+import { userRoutes } from './api/user/user.routes.js'
+import { boardRoutes } from './api/board/board.routes.js'
+import { setupAsyncLocalStorage } from './middlewares/setupAls.middelware.js'
+
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = dirname(__filename)
 
@@ -31,9 +36,7 @@ if (process.env.NODE_ENV === 'production') {
     app.use(cors(corsOptions))
 }
 
-import { authRoutes } from './api/auth/auth.routes.js'
-import { userRoutes } from './api/user/user.routes.js'
-import { boardRoutes } from './api/board/board.routes.js'
+app.all('*', setupAsyncLocalStorage)
 
 app.use('/api/auth', authRoutes)
 app.use('/api/user', userRoutes)
