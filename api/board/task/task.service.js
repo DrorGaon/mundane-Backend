@@ -30,7 +30,6 @@ async function getTasks(boardId, groupId) {
 
 		const collection = await dbService.getCollection('board')
 		const res = await collection.findOne(criteria, {projection})
-
 		const tasks = res.groups[0].tasks
 		return tasks
 	} catch (err) {
@@ -41,6 +40,26 @@ async function getTasks(boardId, groupId) {
 
 async function getTaskById(boardId, groupId, taskId) {
 	try {
+		const collection = await dbService.getCollection('board')
+
+		if (groupId === 'null'){
+			const criteria = {
+				_id: ObjectId.createFromHexString(boardId)
+			}
+			  
+			  const projection = {
+				_id: 0,
+				"groups": 1
+			}
+	
+			const res = await collection.findOne(criteria, {projection})
+			const group = res.groups.find(group => {
+				return group.tasks.find((task) => task.id === taskId)
+			  })
+			groupId = group.id
+		}
+
+
 		const criteria = {
 			_id: ObjectId.createFromHexString(boardId),
 			"groups.id": groupId,
@@ -52,7 +71,6 @@ async function getTaskById(boardId, groupId, taskId) {
 			"groups.$": 1
 		}
 
-		const collection = await dbService.getCollection('board')
 		const res = await collection.findOne(criteria, {projection})
 
 		const task = res.groups[0].tasks.find(task => task.id === taskId)
