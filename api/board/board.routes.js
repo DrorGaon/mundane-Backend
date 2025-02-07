@@ -3,11 +3,9 @@ import express from 'express'
 import { requireAuth, requireAdmin } from '../../middlewares/requireAuth.middleware.js'
 import { getBoards, getBoardById, addBoard, updateBoard, removeBoard, } from './board.controller.js'
 import { addGroup, getGroupById, getGroups, removeGroup, updateGroup } from './group/group.controller.js'
-import { addTask, duplicateTasks, getTaskById, getTasks, removeTask, removeTasks, updateTask } from './task/task.controller.js'
+import { addTask, archiveTasks, duplicateTasks, getTaskById, getTasks, removeTask, removeTasks, updateTask } from './task/task.controller.js'
 
 export const boardRoutes = express.Router()
-
-// removed authentication for now //
 
 //task
 boardRoutes.get('/:id/group/:groupId/task', getTasks)
@@ -26,6 +24,7 @@ boardRoutes.put('/:id/group/:groupId', requireAuth, updateGroup)
 //bulk actions
 boardRoutes.delete('/:id/tasks', requireAuth, removeTasks)
 boardRoutes.post('/:id/tasks', requireAuth, duplicateTasks)
+boardRoutes.put('/:id/tasks', requireAuth, archiveTasks)
 
 //board
 boardRoutes.get('/', getBoards)

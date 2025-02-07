@@ -12,6 +12,7 @@ export const taskService = {
     updateTask,
 	removeTasks,
 	duplicateTasks,
+	archiveTasks,
 }
 
 
@@ -151,21 +152,46 @@ async function updateTask(boardId, groupId, task) {
 	}
 }
 
-async function removeTasks( boardId, taskAndGroupsIds ) {
-	for (const ids of taskAndGroupsIds) {
-		await removeTask(boardId, ids.groupId, ids.taskId)
+async function removeTasks( boardId, taskAndGroupIds ) {
+	try {
+		for (const ids of taskAndGroupIds) {
+			await removeTask(boardId, ids.groupId, ids.taskId)
+		}
+		const collection = await dbService.getCollection('board')
+		return await collection.findOne({_id: ObjectId.createFromHexString(boardId)})	
+	} catch (err) {
+		logger.error(`while removing tasks`, err)
+		throw err
 	}
-	const collection = await dbService.getCollection('board')
-	return await collection.findOne({_id: ObjectId.createFromHexString(boardId)})
 }	
 
 async function duplicateTasks( boardId, tasks ) {
-	const collection = await dbService.getCollection('board')
-	const board = await collection.findOne({_id: ObjectId.createFromHexString(boardId)})
-	for (const task of [...tasks].reverse()) {
-		const group = board.groups.find(group => group.id === task.groupId)
-		task.idx = group.tasks.findIndex(t => t.id === task.id)
-		await addTask(boardId, group.id, task, true)
+	try {
+		const collection = await dbService.getCollection('board')
+		const board = await collection.findOne({_id: ObjectId.createFromHexString(boardId)})
+		for (const task of [...tasks].reverse()) {
+			const group = board.groups.find(group => group.id === task.groupId)
+			task.idx = group.tasks.findIndex(t => t.id === task.id)
+			await addTask(boardId, group.id, task, true)
+		}
+		return await collection.findOne({_id: ObjectId.createFromHexString(boardId)})	
+	} catch (err) {
+		logger.error(`while duplicating tasks`, err)
+		throw err
 	}
-	return await collection.findOne({_id: ObjectId.createFromHexString(boardId)})
 }	
+
+async function archiveTasks(boardId, tasks){
+	try {
+		const updatedTasks = tasks.map(task => ({...task, archivedAt: Date.now()}))
+		for (const task of updatedTasks) {
+			await updateTask(boardId, task.groupId, task)
+		}
+		const collection = await dbService.getCollection('board')
+		const board = await collection.findOne({_id: ObjectId.createFromHexString(boardId)})
+		return board
+	} catch (err) {
+		logger.error(`while archiving tasks`, err)
+		throw err
+	}
+}

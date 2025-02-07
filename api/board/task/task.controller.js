@@ -43,7 +43,6 @@ export async function addTask(req, res) {
         const { loggedinUser } = req
         const { id: boardId, groupId } = req.params
         const task = req.body
-        console.log('add')
         const board = await taskService.addTask(boardId, groupId, task)
         socketService.broadcast({ type: 'board-updated', data: board, room: boardId, userId: loggedinUser._id })
         res.json(board)        
@@ -92,5 +91,19 @@ export async function duplicateTasks(req, res) {
     } catch (err) {
         logger.error('Failed to duplicate', err)
         res.status(500).send({ err: 'Failed to duplicate' })
+    }
+}
+
+export async function archiveTasks(req, res) {
+    try {
+        const { loggedinUser } = req
+        const { id: boardId } = req.params
+        const tasks = req.body
+        const board = await taskService.archiveTasks(boardId, tasks)
+        socketService.broadcast({ type: 'board-updated', data: board, room: boardId, userId: loggedinUser._id })
+        res.json(board)        
+    } catch (err) {
+        logger.error('Failed to remove tasks', err)
+        res.status(500).send({ err: 'Failed to remove tasks' })
     }
 }
