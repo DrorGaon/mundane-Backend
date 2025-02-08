@@ -102,8 +102,6 @@ async function removeTask(boardId, groupId, taskId, isBulkAction = false) {
 }
 
 async function addTask(boardId, groupId, task, activity, isDuplicate = false) {
-  console.log('🚀 ~ addTask ~ activity:', activity)
-
   try {
     task.id = utilService.makeId()
 
@@ -122,8 +120,7 @@ async function addTask(boardId, groupId, task, activity, isDuplicate = false) {
           }
         }
       : {
-          $push: { 'groups.$.tasks': task },
-          $push: { activities: activity }
+          $push: { 'groups.$.tasks': task, activities: activity }
         }
 
     if (isDuplicate) {
