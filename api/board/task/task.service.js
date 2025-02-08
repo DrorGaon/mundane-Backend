@@ -138,6 +138,8 @@ async function addTask(boardId, groupId, task, activity, isDuplicate = false, is
       task.title += ' (copy)'
     }
 
+    if (isUnshift) task.title = 'New task'
+
     const collection = await dbService.getCollection('board')
     const { modifiedCount } = await collection.updateOne(criteria, add)
 
