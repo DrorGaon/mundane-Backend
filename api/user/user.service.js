@@ -22,6 +22,7 @@ async function query(filterBy = {}) {
 			user.createdAt = user._id.getTimestamp()
 			return user
 		})
+		users = users.filter(user => !user.username.includes('guest'))
 		return users
 	} catch (err) {
 		logger.error('cannot find users', err)
