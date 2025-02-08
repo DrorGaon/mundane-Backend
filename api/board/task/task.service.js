@@ -101,7 +101,7 @@ async function removeTask(boardId, groupId, taskId, isBulkAction = false) {
   }
 }
 
-async function addTask(boardId, groupId, task, activity, isDuplicate = false) {
+async function addTask(boardId, groupId, task, activity, isDuplicate = false, isMoved, isUnshift) {
   try {
     task.id = utilService.makeId()
 
@@ -112,20 +112,29 @@ async function addTask(boardId, groupId, task, activity, isDuplicate = false) {
 
     const add = isDuplicate
       ? {
-          $push: {
-            'groups.$.tasks': {
-              $each: [task],
-              $position: task.idx + 1
-            }
+        $push: {
+          'groups.$.tasks': {
+            $each: [task],
+            $position: task.idx + 1
           }
         }
-      : {
-          $push: { 'groups.$.tasks': task, activities: activity }
+      }
+      : isUnshift
+      ? {
+        $push: {
+          'groups.$.tasks': {
+            $each: [task],
+            $position: 0
+          }
         }
+      }
+      :{
+        $push: { 'groups.$.tasks': task, activities: activity }
+      }
 
-    if (isDuplicate) {
-      delete task.idx
+      if (isDuplicate) {
       delete task.groupId
+      delete task.idx
       task.title += ' (copy)'
     }
 
@@ -141,7 +150,6 @@ async function addTask(boardId, groupId, task, activity, isDuplicate = false) {
 }
 
 async function updateTask(boardId, groupId, task, activity) {
-  console.log('🚀 ~ updateTask ~ activity:', activity)
   try {
     const criteria = {
       _id: ObjectId.createFromHexString(boardId),

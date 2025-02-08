@@ -25,7 +25,6 @@ export async function getGroupById(req, res) {
 }
 
 export async function removeGroup(req, res) {
-    console.log('delete group')
     try {
         const { loggedinUser } = req
         const { id: boardId, groupId } = req.params
@@ -42,8 +41,8 @@ export async function addGroup(req, res) {
     try {
         const { loggedinUser } = req
         const { id: boardId } = req.params
-        const group = req.body
-        const board = await groupService.addGroup(boardId, group)
+        const {group, isUnshift} = req.body
+        const board = await groupService.addGroup(boardId, group, isUnshift)
         socketService.broadcast({ type: 'board-updated', data: board, room: boardId, userId: loggedinUser._id })
         res.json(board)
     } catch (err) {

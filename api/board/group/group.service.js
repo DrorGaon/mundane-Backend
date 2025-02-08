@@ -74,15 +74,26 @@ async function removeGroup(boardId, groupId) {
     }
 }
 
-async function addGroup(boardId, group) {
+async function addGroup(boardId, group, isUnshift) {
     try {
         group.id = utilService.makeId()
         const criteria = {
             _id: ObjectId.createFromHexString(boardId),
         }
         
+        const add = isUnshift 
+        ? {
+              $push: {
+                groups: {
+                  $each: [group],
+                  $position: 0
+                }
+              }
+        }
+        : { $push: { groups: group}}
+
         const collection = await dbService.getCollection('board')
-        const { modifiedCount } = await collection.updateOne(criteria, { $push: { groups: group}})
+        const { modifiedCount } = await collection.updateOne(criteria, add)
 
         if (!modifiedCount) throw new Error('problem adding group')
         return await collection.findOne(criteria)

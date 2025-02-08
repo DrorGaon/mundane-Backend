@@ -41,8 +41,8 @@ export async function addTask(req, res) {
   try {
     const { loggedinUser } = req
     const { id: boardId, groupId } = req.params
-    const { task, activity } = req.body
-    const board = await taskService.addTask(boardId, groupId, task, activity)
+    const { task, activity, isUnshift } = req.body
+    const board = await taskService.addTask(boardId, groupId, task, activity, null, null, isUnshift)
     socketService.broadcast({ type: 'board-updated', data: board, room: boardId, userId: loggedinUser._id })
     res.json(board)
   } catch (err) {
