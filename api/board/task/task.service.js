@@ -122,7 +122,8 @@ async function addTask(boardId, groupId, task, activity, isDuplicate = false) {
           }
         }
       : {
-          $push: { 'groups.$.tasks': task }
+          $push: { 'groups.$.tasks': task },
+          $push: { activities: activity }
         }
 
     if (isDuplicate) {
@@ -153,7 +154,8 @@ async function updateTask(boardId, groupId, task, activity) {
     const update = {
       $set: {
         'groups.$.tasks.$[elem]': task
-      }
+      },
+      $push: { activities: activity }
     }
 
     const arrayFilters = [{ 'elem.id': task.id }]
